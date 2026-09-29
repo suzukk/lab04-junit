@@ -66,6 +66,7 @@ class GradeCalculatorTest {
     @DisplayName("Дүнгийн хязгаарын утгууд зөв ангилагдах ёстой")
     @CsvSource({
             "95, A",
+            "30, F",
             "90, A",
             "89.99, B",
             "80, B",

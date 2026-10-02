@@ -8,18 +8,38 @@
 ## Ашигласан технологи
 
 * Java: OpenJDK 17.0.20.1
-* Maven: 3.9.16
-* JUnit 5 (Jupiter): 5.10.2
+* Maven: Apache Maven 3.9.16
+* JUnit Jupiter: 5.10.2
 * Maven Surefire Plugin: 3.2.5
 * OS: Arch Linux
 
-## Тестийн үр дүн
+## Java хувилбар
 
-`GradeCalculator` классын `letterGrade()` болон `totalScore()` method-уудыг JUnit 5 ашиглан тестэлсэн. Нийт **11 test method** бичиж, parameterized test-үүдийн хамт **23 test case** ажиллуулсан. Эцсийн тестийн үр дүн `Tests run: 23, Failures: 0, Errors: 0, Skipped: 0` бөгөөд `BUILD SUCCESS` болсон. Тестүүдэд ердийн утга, хязгаарын утга, буруу утга болон exception үүсэх нөхцөлүүдийг шалгасан. Мөн `letterGrade()` method-ийн `90` онооны заагийг шалгах boundary test оруулсан. Mutation testing хийхдээ `score >= 90` нөхцөлийг зориудаар `score > 90` болгон өөрчилсөн бөгөөд `90` онооны тест mutation-ийг илрүүлж, тестийн ажиллалт `BUILD FAILURE` болсон. Дараа нь эх кодыг сэргээж, бүх тестийг дахин ажиллуулахад 23 тест бүгд амжилттай болсон. Энэ лабораторийн хамгийн сонирхолтой хэсэг нь `90` онооны boundary test нь жижигхэн кодын өөрчлөлтийг шууд илрүүлж чадсан явдал байлаа.
+`java -version` командын гаралт:
+
+```text
+openjdk version "17.0.20.1" 2026-08-18
+OpenJDK Runtime Environment (build 17.0.20.1+1)
+OpenJDK 64-Bit Server VM (build 17.0.20.1+1, mixed mode, sharing)
+```
+
+## Maven хувилбар
+
+`mvn -version` командын гаралт:
+
+```text
+Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)
+Maven home: /usr/share/java/maven
+Java version: 17.0.20.1, vendor: Arch Linux, runtime: /usr/lib/jvm/java-17-openjdk
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "7.2.3-arch1-2", arch: "amd64", family: "unix"
+```
 
 ## Тестийн бүтэц
 
-`GradeCalculatorTest` класст дараах төрлийн тестүүдийг хэрэгжүүлсэн:
+`GradeCalculatorTest` класст нийт **11 test method** хэрэгжүүлсэн. JUnit 5-ийн `@Test` болон `@ParameterizedTest` ашиглан `letterGrade()` болон `totalScore()` method-уудыг шалгасан. Тестүүдэд ердийн утга, boundary утга, буруу утга болон `IllegalArgumentException` үүсэх нөхцөлүүдийг хамруулсан.
+
+Шалгасан гол утгууд:
 
 * 95 → A
 * 85 → B
@@ -32,20 +52,30 @@
 * 59.99 → F
 * 0 → F
 * 100 → A
-* Буруу оноо (`-1`, `101`) үед `IllegalArgumentException`
+* -1 болон 101 → `IllegalArgumentException`
 * `totalScore()`-ийн зөв нийлбэр
-* `totalScore()`-ийн буруу утгууд
-* `@ParameterizedTest` ашигласан boundary болон calculation тестүүд
+* `totalScore()`-ийн зөвшөөрөгдөх хязгаараас гарсан утгууд
+
+## Эцсийн тестийн үр дүн
+
+Эцсийн зөв код дээр:
+
+```text
+Tests run: 23, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+Энэ үр дүнг `results/mvn-test.txt` файлд хадгалсан.
 
 ## Mutation Testing
 
-Mutation хийхийн өмнөх зөв нөхцөл:
+Mutation testing хийхийн тулд `letterGrade()` method-ийн:
 
 ```java
 if (score >= 90)
 ```
 
-Mutation хийх үед:
+нөхцөлийг зориудаар:
 
 ```java
 if (score > 90)
@@ -53,21 +83,22 @@ if (score > 90)
 
 болгон өөрчилсөн.
 
-Mutation-ийн дараа тестийн үр дүн:
+Mutation-ийн үр дүнг `results/mvn-test-mutant.txt` файлд хадгалсан бөгөөд тухайн файлд **22 test case** ажилласан байна:
 
 ```text
-Tests run: 23, Failures: 1, Errors: 0, Skipped: 0
+Tests run: 22, Failures: 1, Errors: 0, Skipped: 0
 BUILD FAILURE
 ```
 
-Энэ нь `90` оноо `A` байх ёстой гэсэн boundary test mutation-ийг илрүүлж байгааг харуулсан.
+### Хамгийн сонирхолтой тест ба алдаа
 
-Mutation testing-ийн үр дүнг:
+Mutation testing-ийн үед `90` оноо `A` дүн байх ёстой гэсэн boundary test хамгийн чухал тест болсон. Эх кодод `score >= 90` гэж бичсэн үед 90 оноо зөвөөр `A` болж байсан. Харин mutation хийхдээ нөхцөлийг `score > 90` болгосноор яг 90 оноо `B` гэж буруу ангилагдсан. Үүний улмаас `letterGradeBoundaries` parameterized test-ийн `90, A` case унаж, mutation test `BUILD FAILURE` болсон. Энэ нь boundary test нь зөвхөн ердийн утгыг шалгахаас илүүтэйгээр нөхцөлийн жижиг алдааг илрүүлэхэд чухал гэдгийг харуулсан. Мөн `>=` болон `>` хоёрын ялгаа нь програмын үр дүнд шууд нөлөөлж болохыг ойлгосон. Mutation testing ашигласнаар миний тестүүд эх кодын өөрчлөлтийг үнэхээр илрүүлж чадаж байгаа эсэхийг шалгаж чадсан. Эцэст нь mutation-ийг буцааж `score >= 90` болгосны дараа бүх 23 final test амжилттай ажилласан.
 
-* `results/mvn-test-mutant.txt`
+## Mutation Testing-ийн дүгнэлт
 
-Final green test-ийн үр дүнг:
+| Үр дүн        | Tests run | Failures | Build         |
+| ------------- | --------: | -------: | ------------- |
+| Final зөв код |        23 |        0 | BUILD SUCCESS |
+| Mutant код    |        22 |        1 | BUILD FAILURE |
 
-* `results/mvn-test.txt`
-
-файлуудад хадгалсан.
+Mutation-ийн дараах бодит үр дүн `results/mvn-test-mutant.txt` файлд, эцсийн амжилттай тестийн үр дүн `results/mvn-test.txt` файлд хадгалагдсан.
